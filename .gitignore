@@ -1,0 +1,14 @@
+# Dependencies
+node_modules/
+
+# Local runtime config (contains project-specific keys)
+config.js
+
+# Environment files
+.env
+.env.*
+
+# OS/editor artifacts
+.DS_Store
+Thumbs.db
+.vscode/

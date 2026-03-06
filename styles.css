@@ -1,0 +1,284 @@
+:root {
+  --bg-a: #5573d9;
+  --bg-b: #6f46b8;
+  --panel: #f6f8fc;
+  --text: #263044;
+  --muted: #6e7a92;
+  --border: #d9e0ec;
+  --accent: #1f7cff;
+  --btn-dark: #6c7786;
+  --ok: #0f9d58;
+  --error: #d93025;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Manrope", sans-serif;
+  color: var(--text);
+  background:
+    radial-gradient(circle at 15% 15%, #6f86e4 0%, transparent 35%),
+    radial-gradient(circle at 85% 85%, #8045bc 0%, transparent 30%),
+    linear-gradient(140deg, var(--bg-a), var(--bg-b));
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+
+.form-shell {
+  width: min(100%, 620px);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--panel);
+  box-shadow: 0 16px 32px rgba(29, 47, 87, 0.28);
+}
+
+.form-header {
+  background: #ffffff;
+  color: #23314a;
+  text-align: center;
+  border-bottom: 1px solid #dbe3f0;
+}
+
+.form-header img {
+  width: 100%;
+  height: 156px;
+  object-fit: cover;
+  display: block;
+}
+
+.header-copy {
+  padding: 14px 16px 12px;
+  background: #ffffff;
+}
+
+.form-header h1 {
+  margin: 0;
+  font-size: clamp(1.45rem, 2.6vw, 2rem);
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  background: linear-gradient(120deg, #4e73df, #6f46b8);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.form-header p {
+  margin: 8px 0 0;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #5468a9;
+}
+
+.form-footer {
+  border-top: 1px solid #dbe3f0;
+  text-align: center;
+  padding: 10px 14px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #5a6885;
+  background: #f8faff;
+}
+
+form {
+  padding: 24px;
+}
+
+.field {
+  margin-bottom: 14px;
+}
+
+label {
+  display: block;
+  font-size: 0.86rem;
+  font-weight: 700;
+  margin-bottom: 7px;
+}
+
+input,
+select,
+textarea,
+button {
+  font: inherit;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 10px 11px;
+  font-size: 0.9rem;
+  color: #303c54;
+  background: #ffffff;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: #84a6ff;
+  box-shadow: 0 0 0 3px rgba(100, 136, 241, 0.12);
+}
+
+textarea {
+  min-height: 78px;
+  resize: vertical;
+}
+
+.hint {
+  margin-top: 5px;
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.geo-box {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #f9fbff;
+  padding: 10px;
+}
+
+.geo-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.small-label {
+  font-size: 0.74rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+  display: block;
+  color: #4f5972;
+}
+
+.customer-search-results {
+  margin-top: 8px;
+  display: grid;
+  gap: 6px;
+}
+
+.search-result-item {
+  border: 1px solid #ccdaf3;
+  border-radius: 6px;
+  background: #ffffff;
+  padding: 8px 10px;
+  cursor: pointer;
+  text-align: left;
+  color: #2d3a54;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.search-result-item:hover {
+  background: #f3f7ff;
+  border-color: #9db8eb;
+}
+
+.search-result-title {
+  display: block;
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.search-result-meta {
+  display: block;
+  margin-top: 3px;
+  font-size: 0.75rem;
+  color: #61708f;
+}
+
+.customer-search-empty {
+  font-size: 0.78rem;
+  color: #5f6f90;
+  background: #ffffff;
+  border: 1px dashed #c8d6f1;
+  border-radius: 6px;
+  padding: 8px 10px;
+}
+
+.photo-preview-wrap {
+  margin-top: 8px;
+  border: 1px dashed #b8c5dd;
+  border-radius: 6px;
+  background: #ffffff;
+  padding: 8px;
+}
+
+#photoPreview {
+  max-width: 100%;
+  max-height: 180px;
+  border-radius: 4px;
+  display: none;
+  object-fit: contain;
+}
+
+.btn {
+  width: 100%;
+  border: 0;
+  border-radius: 5px;
+  color: #fff;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  padding: 11px 12px;
+  cursor: pointer;
+  transition: filter 0.15s ease, transform 0.03s ease;
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn:hover {
+  filter: brightness(1.05);
+}
+
+.btn-location,
+.btn-clear {
+  background: var(--btn-dark);
+}
+
+.btn-submit {
+  background: var(--accent);
+  margin-top: 8px;
+}
+
+.divider {
+  height: 1px;
+  margin: 10px 0 14px;
+  background: #dbe3f0;
+  border: 0;
+}
+
+.status {
+  min-height: 1.3em;
+  margin: 8px 0 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.status.ok {
+  color: var(--ok);
+}
+
+.status.error {
+  color: var(--error);
+}
+
+@media (max-width: 640px) {
+  form {
+    padding: 16px;
+  }
+
+  .geo-grid {
+    grid-template-columns: 1fr;
+  }
+
+}
