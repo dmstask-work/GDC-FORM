@@ -29,6 +29,121 @@ body {
   padding: 20px;
 }
 
+body.menu-page {
+  background:
+    radial-gradient(circle at 12% 12%, #6f86e4 0%, transparent 34%),
+    radial-gradient(circle at 86% 86%, #8045bc 0%, transparent 30%),
+    linear-gradient(140deg, var(--bg-a), var(--bg-b));
+}
+
+.menu-shell {
+  width: min(100%, 620px);
+  min-height: min(92vh, 880px);
+  border-radius: 10px;
+  overflow: hidden;
+  background: #f6f8fc;
+  box-shadow: 0 16px 32px rgba(29, 47, 87, 0.28);
+}
+
+.menu-header {
+  background: #ffffff;
+  border-bottom: 1px solid #dbe3f0;
+}
+
+.menu-header img {
+  width: 100%;
+  height: 156px;
+  object-fit: cover;
+  display: block;
+}
+
+.menu-actions {
+  padding: 30px 26px 34px;
+  display: grid;
+  gap: 12px;
+}
+
+.menu-title {
+  margin: 0;
+  text-align: center;
+  font-size: clamp(1.3rem, 2.2vw, 1.7rem);
+  font-weight: 800;
+  background: linear-gradient(120deg, #4e73df, #6f46b8);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.menu-subtitle {
+  margin: 0 0 10px;
+  text-align: center;
+  color: #5a6783;
+  font-size: 0.9rem;
+}
+
+.menu-btn {
+  border: 1px solid #d3dced;
+  border-radius: 12px;
+  background: linear-gradient(160deg, #ffffff 0%, #f3f7ff 100%);
+  color: #25324c;
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 112px;
+  padding: 16px 18px;
+  line-height: 1.2;
+  box-shadow: 0 10px 18px rgba(56, 86, 151, 0.12);
+  position: relative;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.menu-btn::after {
+  content: ">";
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6787d8;
+  font-size: 1.3rem;
+  font-weight: 800;
+}
+
+.menu-btn-title {
+  font-size: 1.26rem;
+  font-weight: 800;
+  letter-spacing: 0.1px;
+}
+
+.menu-btn-hint {
+  margin-top: 6px;
+  font-size: 0.82rem;
+  color: #607195;
+}
+
+.menu-btn:hover {
+  transform: translateY(-1px);
+  border-color: #aac0ec;
+  box-shadow: 0 12px 22px rgba(62, 95, 168, 0.2);
+}
+
+.activity-placeholder {
+  padding: 28px 24px;
+}
+
+.activity-placeholder p {
+  margin: 0 0 16px;
+  font-size: 0.95rem;
+  color: #38445f;
+}
+
+.back-btn {
+  min-height: 56px;
+  font-size: 1rem;
+  align-items: center;
+}
+
 .form-shell {
   width: min(100%, 620px);
   border-radius: 8px;
@@ -160,6 +275,20 @@ textarea {
   color: #4f5972;
 }
 
+.shipping-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #f9fbff;
+  padding: 10px;
+}
+
+.shipping-grid input {
+  margin-top: 4px;
+}
+
 .customer-search-results {
   margin-top: 8px;
   display: grid;
@@ -202,6 +331,22 @@ textarea {
   border: 1px dashed #c8d6f1;
   border-radius: 6px;
   padding: 8px 10px;
+}
+
+.btn-edit-manual {
+  margin-top: 8px;
+  border: 1px solid #9bb4e7;
+  border-radius: 6px;
+  background: #eff4ff;
+  color: #2c4f9b;
+  padding: 7px 10px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-edit-manual:hover {
+  background: #e6efff;
 }
 
 .photo-preview-wrap {
@@ -272,12 +417,76 @@ textarea {
   color: var(--error);
 }
 
+.success-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+
+.success-modal[hidden] {
+  display: none;
+}
+
+.success-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(24, 36, 64, 0.48);
+}
+
+.success-modal-card {
+  position: relative;
+  width: min(100%, 360px);
+  border-radius: 10px;
+  background: #ffffff;
+  border: 1px solid #d9e0ec;
+  box-shadow: 0 18px 30px rgba(20, 37, 72, 0.25);
+  padding: 18px 16px 16px;
+  text-align: center;
+}
+
+.success-modal-card h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #2a3a56;
+}
+
+.success-modal-card p {
+  margin: 10px 0 14px;
+  font-size: 0.9rem;
+  color: #556686;
+}
+
 @media (max-width: 640px) {
+  .menu-actions {
+    padding: 22px 14px 20px;
+  }
+
+  .menu-btn {
+    min-height: 92px;
+    padding: 13px 14px;
+  }
+
+  .menu-btn-title {
+    font-size: 1.08rem;
+  }
+
+  .menu-btn-hint {
+    font-size: 0.77rem;
+  }
+
   form {
     padding: 16px;
   }
 
   .geo-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .shipping-grid {
     grid-template-columns: 1fr;
   }
 

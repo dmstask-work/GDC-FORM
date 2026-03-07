@@ -3,95 +3,36 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Customer Data Entry Form</title>
+  <title>Sales Data Form</title>
+  <link rel="icon" href="image/title_image.png" type="image/png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
-<body>
-  <main class="form-shell">
-    <header class="form-header">
-      <img src="image/header_image.png" alt="Form header image">
-      <div class="header-copy">
-        <h1>Form Informasi Prospek</h1>
-      </div>
+<body class="menu-page">
+  <main class="menu-shell">
+    <header class="menu-header">
+      <img src="image/header_image.png" alt="header image">
     </header>
-    
-    <form id="customerForm">
-      <div class="field">
-        <label for="salesName">Nama Sales :</label>
-        <select id="salesName" name="sales_name" required>
-          <option value="" selected disabled>Pilih nama sales</option>
-        </select>
-      </div>
 
-      <div class="field">
-        <label for="customerName">Nama Prospek :</label>
-        <input id="customerName" name="customer_name" type="text" placeholder="Masukan nama prospek" required>
-        <p class="hint">Ketik nama prospek. Jika sudah ada, ID akan terisi otomatis.</p>
-        <div id="customerSearchResults" class="customer-search-results" aria-live="polite"></div>
-      </div>
+    <section class="menu-actions" aria-label="Pilih Form">
+      <h1 class="menu-title">Pilih Jenis Form</h1>
+      <p class="menu-subtitle">Silakan pilih form yang ingin diisi oleh tim sales.</p>
 
-      <div class="field">
-        <label for="customerId">ID Pembeli :</label>
-        <input id="customerId" name="customer_id" type="text" readonly>
-        <p class="hint">Auto-generated (CST000001, CST000002, dst.)</p>
-      </div>
+      <a class="menu-btn" href="form_informasi.html">
+        <span class="menu-btn-title">Form Informasi Pembeli</span>
+        <span class="menu-btn-hint">Input data pembeli baru dan detail lokasi</span>
+      </a>
 
-      <div class="field">
-        <label>Geolocation :</label>
-        <div class="geo-box">
-          <div class="geo-grid">
-            <div>
-              <span class="small-label">Latitude :</span>
-              <input id="latitude" name="latitude" type="text" readonly>
-            </div>
-            <div>
-              <span class="small-label">Longitude :</span>
-              <input id="longitude" name="longitude" type="text" readonly>
-            </div>
-          </div>
-          <button id="btnLocation" class="btn btn-location" type="button">GET MY LOCATION</button>
-        </div>
-      </div>
-
-      <div class="field">
-        <label for="address">Alamat Prospek :</label>
-        <textarea id="address" name="address" placeholder="Masukan alamat prospek" required></textarea>
-      </div>
-
-      <div class="field">
-        <label for="phone">No Telp/WA :</label>
-        <input id="phone" name="phone" type="text" placeholder="08...." required>
-      </div>
-
-      <div class="field">
-        <label for="estimatedOmset">Perkiraan Omset Per-Bulan (Kg) :</label>
-        <input id="estimatedOmset" name="estimated_omset_kg" type="number" min="0" step="0.01" value="0" required>
-      </div>
-
-      <div class="field">
-        <label for="photo">Foto Prospek :</label>
-        <input id="photo" name="photo" type="file" accept="image/*" capture="environment" required>
-        <p class="hint">Ambil foto dari mobile/laptop. Maksimum 5MB.</p>
-        <div class="photo-preview-wrap">
-          <img id="photoPreview" alt="Photo preview">
-        </div>
-      </div>
-
-      <hr class="divider">
-      <button id="btnSubmit" class="btn btn-submit" type="submit">SUBMIT FORM</button>
-      <button class="btn btn-clear" type="reset" style="margin-top: 8px;">CLEAR FORM</button>
-      <p id="status" class="status" aria-live="polite"></p>
-    </form>
+      <a class="menu-btn" href="form_aktivitas.html">
+        <span class="menu-btn-title">Form Aktivitas Harian Sales</span>
+        <span class="menu-btn-hint">Laporan kegiatan dan progres harian sales</span>
+      </a>
+    </section>
 
     <footer class="form-footer">created by @GDC</footer>
   </main>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="config.js"></script>
-  <script src="app.js"></script>
 </body>
 </html>
 

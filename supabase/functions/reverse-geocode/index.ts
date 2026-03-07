@@ -48,9 +48,24 @@ serve(async (req) => {
     }
 
     const data = await response.json();
-    const address = data?.features?.[0]?.properties?.formatted || "";
+    const props = data?.features?.[0]?.properties || {};
 
-    return new Response(JSON.stringify({ address }), {
+    const streetParts = [props.street, props.housenumber].filter(Boolean);
+    const streetAddress = streetParts.join(" ").trim() || props.address_line1 || "";
+    const province = props.state || props.province || "";
+    const city = props.city || props.county || props.state_district || "";
+    const district = props.district || props.suburb || props.city_district || "";
+    const subdistrict = props.suburb || props.quarter || props.neighbourhood || "";
+    const address = props.formatted || [streetAddress, subdistrict, district, city, province].filter(Boolean).join(", ");
+
+    return new Response(JSON.stringify({
+      address,
+      streetAddress,
+      province,
+      city,
+      district,
+      subdistrict
+    }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" }
     });
   } catch (error) {

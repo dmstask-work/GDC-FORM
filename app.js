@@ -1,4 +1,12 @@
-const SALES_OPTIONS = ["YUNIA", "BENI", "IDA", "YOGI", "NUR", "DWI"];
+const DEFAULT_SALES_OPTIONS = [
+  { code: "S001", name: "YUNIA" },
+  { code: "S002", name: "YOGI" },
+  { code: "S003", name: "IDA" },
+  { code: "S004", name: "NUR" },
+  { code: "S005", name: "DWI" },
+  { code: "S006", name: "BENI" },
+  { code: "S007", name: "RATNO" }
+];
 
 const form = document.getElementById("customerForm");
 const statusEl = document.getElementById("status");
@@ -6,13 +14,24 @@ const salesNameInput = document.getElementById("salesName");
 const customerSearchResults = document.getElementById("customerSearchResults");
 const customerNameInput = document.getElementById("customerName");
 const customerIdInput = document.getElementById("customerId");
+const contactMethodInput = document.getElementById("contactMethod");
 const latitudeInput = document.getElementById("latitude");
 const longitudeInput = document.getElementById("longitude");
 const addressInput = document.getElementById("address");
 const photoInput = document.getElementById("photo");
 const photoPreview = document.getElementById("photoPreview");
+const kanvasingFields = document.getElementById("kanvasingFields");
+const callFields = document.getElementById("callFields");
+const callStreetAddressInput = document.getElementById("callStreetAddress");
+const callProvinceInput = document.getElementById("callProvince");
+const callCityInput = document.getElementById("callCity");
+const callDistrictInput = document.getElementById("callDistrict");
+const callSubdistrictInput = document.getElementById("callSubdistrict");
 const btnLocation = document.getElementById("btnLocation");
 const btnSubmit = document.getElementById("btnSubmit");
+const successModal = document.getElementById("successModalInformasi");
+const successModalMessage = document.getElementById("successModalInformasiMessage");
+const btnCloseSuccessModal = document.getElementById("btnCloseSuccessInformasi");
 
 const config = window.APP_CONFIG || {};
 if (!config.SUPABASE_URL || !config.SUPABASE_ANON_KEY || config.SUPABASE_ANON_KEY.includes("<PUT_")) {
@@ -21,28 +40,108 @@ if (!config.SUPABASE_URL || !config.SUPABASE_ANON_KEY || config.SUPABASE_ANON_KE
 }
 
 const supabaseClient = window.supabase.createClient(config.SUPABASE_URL, config.SUPABASE_ANON_KEY);
+const salesTableName = config.SALES_TABLE_NAME || "sales_master";
+const wilayahApiBase = (config.WILAYAH_API_BASE_URL || "https://www.emsifa.com/api-wilayah-indonesia/api").replace(/\/+$/, "");
 let nextCustomerCode = "CST000001";
 let customerLookupTimer = null;
 let latestLookupRequest = 0;
+let salesOptions = [...DEFAULT_SALES_OPTIONS];
+let salesByCode = Object.fromEntries(salesOptions.map((item) => [item.code, item]));
+let cachedProvinces = [];
+let lastReverseGeocodeDetails = null;
 
-hydrateSalesDropdown();
-bindPhotoPreview();
-registerEvents();
-prepareNextCustomerCode();
+initializeApp();
 
-function hydrateSalesDropdown() {
+async function initializeApp() {
+  await hydrateSalesDropdown();
+  bindPhotoPreview();
+  setupSuccessModal();
+  registerEvents();
+  syncContactMethodMode();
+  await prepareNextCustomerCode();
+}
+
+function setupSuccessModal() {
+  if (!successModal || !btnCloseSuccessModal) {
+    return;
+  }
+
+  btnCloseSuccessModal.addEventListener("click", closeSuccessModal);
+  successModal.addEventListener("click", (event) => {
+    const target = event.target;
+    if (target && target.dataset && target.dataset.modalClose === "true") {
+      closeSuccessModal();
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !successModal.hidden) {
+      closeSuccessModal();
+    }
+  });
+}
+
+function openSuccessModal(message) {
+  if (!successModal || !successModalMessage) {
+    return;
+  }
+  successModalMessage.textContent = message;
+  successModal.hidden = false;
+}
+
+function closeSuccessModal() {
+  if (!successModal) {
+    return;
+  }
+  successModal.hidden = true;
+}
+
+async function hydrateSalesDropdown() {
+  salesNameInput.innerHTML = "<option value=\"\" selected disabled>Pilih kode sales</option>";
+
+  try {
+    const { data, error } = await supabaseClient
+      .from(salesTableName)
+      .select("sales_code, sales_name")
+      .eq("is_active", true)
+      .order("sales_code", { ascending: true });
+
+    if (!error && data && data.length > 0) {
+      salesOptions = data.map((row) => ({
+        code: String(row.sales_code || "").trim(),
+        name: String(row.sales_name || "").trim()
+      })).filter((item) => item.code && item.name);
+    }
+  } catch (error) {
+    console.warn("Unable to load sales master. Using frontend fallback list.", error.message);
+  }
+
+  salesByCode = Object.fromEntries(salesOptions.map((item) => [item.code, item]));
   const list = document.createDocumentFragment();
-  for (const item of SALES_OPTIONS) {
+  for (const item of salesOptions) {
     const option = document.createElement("option");
-    option.value = item;
-    option.textContent = item;
+    option.value = item.code;
+    option.textContent = `${item.code} - ${item.name}`;
     list.appendChild(option);
   }
   salesNameInput.appendChild(list);
 }
 
+function getSelectedSales() {
+  const code = (salesNameInput.value || "").trim();
+  const selected = salesByCode[code];
+  if (!selected) {
+    throw new Error("Please select a valid sales code.");
+  }
+  return selected;
+}
+
 function registerEvents() {
   btnLocation.addEventListener("click", onGetLocationClick);
+  contactMethodInput.addEventListener("change", onContactMethodChange);
+  callProvinceInput.addEventListener("change", onCallProvinceChange);
+  callCityInput.addEventListener("change", onCallCityChange);
+  callDistrictInput.addEventListener("change", onCallDistrictChange);
   customerNameInput.addEventListener("input", onCustomerNameInput);
   customerNameInput.addEventListener("blur", () => {
     // Delay so click on suggestion can still fire before the list closes.
@@ -52,6 +151,174 @@ function registerEvents() {
   });
   form.addEventListener("submit", onSubmitForm);
   form.addEventListener("reset", onResetForm);
+}
+
+function onContactMethodChange() {
+  syncContactMethodMode();
+}
+
+function syncContactMethodMode() {
+  const mode = contactMethodInput.value;
+  const isKanvasing = mode === "kanvasing";
+  const isCall = mode === "call_telp_wa";
+
+  kanvasingFields.hidden = !isKanvasing;
+  callFields.hidden = !isCall;
+
+  addressInput.required = isKanvasing;
+  photoInput.required = isKanvasing;
+
+  callStreetAddressInput.required = isCall;
+  callProvinceInput.required = isCall;
+  callCityInput.required = isCall;
+  callDistrictInput.required = isCall;
+  callSubdistrictInput.required = isCall;
+
+  if (isCall) {
+    latitudeInput.value = "";
+    longitudeInput.value = "";
+    addressInput.value = "";
+    photoInput.value = "";
+    photoPreview.style.display = "none";
+    photoPreview.removeAttribute("src");
+    ensureCallProvincesLoaded();
+  }
+
+  if (isKanvasing) {
+    resetCallAddressFields();
+  }
+}
+
+async function ensureCallProvincesLoaded() {
+  if (cachedProvinces.length > 0) {
+    return;
+  }
+
+  try {
+    const provinces = await fetchWilayahList("provinces.json");
+    cachedProvinces = provinces;
+    populateWilayahSelect(callProvinceInput, provinces, "Pilih provinsi");
+    setStatus("Data provinsi loaded.", "ok");
+  } catch (error) {
+    console.error(error);
+    setStatus(`Gagal memuat data provinsi: ${error.message}`, "error");
+  }
+}
+
+async function onCallProvinceChange() {
+  const provinceId = callProvinceInput.value;
+  resetWilayahSelect(callCityInput, "Pilih kota/kabupaten");
+  resetWilayahSelect(callDistrictInput, "Pilih kecamatan");
+  resetWilayahSelect(callSubdistrictInput, "Pilih kelurahan");
+
+  if (!provinceId) {
+    return;
+  }
+
+  try {
+    const cities = await fetchWilayahList(`regencies/${encodeURIComponent(provinceId)}.json`);
+    populateWilayahSelect(callCityInput, cities, "Pilih kota/kabupaten");
+  } catch (error) {
+    console.error(error);
+    setStatus(`Gagal memuat kota/kabupaten: ${error.message}`, "error");
+  }
+}
+
+async function onCallCityChange() {
+  const cityId = callCityInput.value;
+  resetWilayahSelect(callDistrictInput, "Pilih kecamatan");
+  resetWilayahSelect(callSubdistrictInput, "Pilih kelurahan");
+
+  if (!cityId) {
+    return;
+  }
+
+  try {
+    const districts = await fetchWilayahList(`districts/${encodeURIComponent(cityId)}.json`);
+    populateWilayahSelect(callDistrictInput, districts, "Pilih kecamatan");
+  } catch (error) {
+    console.error(error);
+    setStatus(`Gagal memuat kecamatan: ${error.message}`, "error");
+  }
+}
+
+async function onCallDistrictChange() {
+  const districtId = callDistrictInput.value;
+  resetWilayahSelect(callSubdistrictInput, "Pilih kelurahan");
+
+  if (!districtId) {
+    return;
+  }
+
+  try {
+    const subdistricts = await fetchWilayahList(`villages/${encodeURIComponent(districtId)}.json`);
+    populateWilayahSelect(callSubdistrictInput, subdistricts, "Pilih kelurahan");
+  } catch (error) {
+    console.error(error);
+    setStatus(`Gagal memuat kelurahan: ${error.message}`, "error");
+  }
+}
+
+async function fetchWilayahList(path) {
+  const response = await fetch(`${wilayahApiBase}/${path}`);
+  if (!response.ok) {
+    throw new Error(`Wilayah API error ${response.status}`);
+  }
+  const data = await response.json();
+  return Array.isArray(data) ? data : [];
+}
+
+function populateWilayahSelect(selectElement, items, placeholderText) {
+  resetWilayahSelect(selectElement, placeholderText);
+
+  const fragment = document.createDocumentFragment();
+  for (const item of items) {
+    const option = document.createElement("option");
+    option.value = String(item.id || "");
+    option.textContent = String(item.name || "");
+    fragment.appendChild(option);
+  }
+
+  selectElement.appendChild(fragment);
+}
+
+function resetWilayahSelect(selectElement, placeholderText) {
+  selectElement.innerHTML = "";
+  const placeholder = document.createElement("option");
+  placeholder.value = "";
+  placeholder.disabled = true;
+  placeholder.selected = true;
+  placeholder.textContent = placeholderText;
+  selectElement.appendChild(placeholder);
+}
+
+function getSelectedOptionLabel(selectElement) {
+  const option = selectElement.options[selectElement.selectedIndex];
+  return option ? String(option.textContent || "").trim() : "";
+}
+
+function buildCallAddress() {
+  const parts = [
+    form.call_street_address.value.trim(),
+    getSelectedOptionLabel(callSubdistrictInput),
+    getSelectedOptionLabel(callDistrictInput),
+    getSelectedOptionLabel(callCityInput),
+    getSelectedOptionLabel(callProvinceInput)
+  ].filter(Boolean);
+
+  return parts.join(", ");
+}
+
+function resetCallAddressFields() {
+  callStreetAddressInput.value = "";
+  resetWilayahSelect(callProvinceInput, "Pilih provinsi");
+  resetWilayahSelect(callCityInput, "Pilih kota/kabupaten");
+  resetWilayahSelect(callDistrictInput, "Pilih kecamatan");
+  resetWilayahSelect(callSubdistrictInput, "Pilih kelurahan");
+
+  if (cachedProvinces.length > 0) {
+    populateWilayahSelect(callProvinceInput, cachedProvinces, "Pilih provinsi");
+  }
 }
 
 function onCustomerNameInput() {
@@ -264,7 +531,14 @@ async function reverseGeocode(lat, lon) {
       }
 
       const payload = await response.json();
-      return payload.address || "";
+      return {
+        address: payload.address || "",
+        streetAddress: payload.streetAddress || "",
+        province: payload.province || "",
+        city: payload.city || "",
+        district: payload.district || "",
+        subdistrict: payload.subdistrict || ""
+      };
     } catch (error) {
       if (error.name === "AbortError") {
         throw new Error("Reverse geocode request timed out.");
@@ -306,9 +580,11 @@ async function onGetLocationClick() {
         latitudeInput.value = lat;
         longitudeInput.value = lon;
 
-        const resolvedAddress = await reverseGeocode(lat, lon);
-        if (resolvedAddress) {
-          addressInput.value = resolvedAddress;
+        const geocode = await reverseGeocode(lat, lon);
+        lastReverseGeocodeDetails = geocode;
+
+        if (geocode.address) {
+          addressInput.value = geocode.address;
           setStatus("Location and address loaded.", "ok");
         } else {
           setStatus("Location loaded, but address could not be resolved.");
@@ -376,23 +652,55 @@ async function onSubmitForm(event) {
 
   try {
     setStatus("Uploading photo and submitting data...");
+    const selectedSales = getSelectedSales();
+    const contactMethod = form.contact_method.value;
+    const isKanvasing = contactMethod === "kanvasing";
+    const isCall = contactMethod === "call_telp_wa";
 
-    const photoFile = photoInput.files && photoInput.files[0] ? photoInput.files[0] : null;
-    const photoError = validatePhoto(photoFile);
-    if (photoError) {
-      setStatus(photoError, "error");
-      return;
+    if (!isKanvasing && !isCall) {
+      throw new Error("Please select valid contact method.");
     }
 
-    const customerCode = customerIdInput.value || nextCustomerCode;
-    const uploadedPhoto = await uploadPhoto(photoFile, customerCode);
+    let uploadedPhoto = {
+      photo_path: null,
+      photo_url: null
+    };
+
+    if (isKanvasing) {
+      const photoFile = photoInput.files && photoInput.files[0] ? photoInput.files[0] : null;
+      const photoError = validatePhoto(photoFile);
+      if (photoError) {
+        setStatus(photoError, "error");
+        return;
+      }
+
+      uploadedPhoto = await uploadPhoto(photoFile, customerCodeOrNext());
+    }
+
+    if (isCall && !form.call_street_address.value.trim()) {
+      throw new Error("Please fill nama jalan / detail alamat.");
+    }
+
+    const customerCode = customerCodeOrNext();
+    const finalAddress = isKanvasing ? form.address.value.trim() : buildCallAddress();
+    if (!finalAddress) {
+      throw new Error("Alamat pembeli wajib diisi.");
+    }
 
     const payload = {
-      sales_name: form.sales_name.value.trim(),
+      sales_code: selectedSales.code,
+      sales_name: selectedSales.name,
       customer_name: form.customer_name.value.trim(),
-      latitude: latitudeInput.value ? Number(latitudeInput.value) : null,
-      longitude: longitudeInput.value ? Number(longitudeInput.value) : null,
-      address: form.address.value.trim(),
+      customer_category: form.customer_category.value,
+      contact_method: contactMethod,
+      latitude: isKanvasing && latitudeInput.value ? Number(latitudeInput.value) : null,
+      longitude: isKanvasing && longitudeInput.value ? Number(longitudeInput.value) : null,
+      address: finalAddress,
+      call_street_address: isCall ? form.call_street_address.value.trim() : (lastReverseGeocodeDetails ? lastReverseGeocodeDetails.streetAddress : null),
+      call_province: isCall ? getSelectedOptionLabel(callProvinceInput) : (lastReverseGeocodeDetails ? lastReverseGeocodeDetails.province : null),
+      call_city: isCall ? getSelectedOptionLabel(callCityInput) : (lastReverseGeocodeDetails ? lastReverseGeocodeDetails.city : null),
+      call_district: isCall ? getSelectedOptionLabel(callDistrictInput) : (lastReverseGeocodeDetails ? lastReverseGeocodeDetails.district : null),
+      call_subdistrict: isCall ? getSelectedOptionLabel(callSubdistrictInput) : (lastReverseGeocodeDetails ? lastReverseGeocodeDetails.subdistrict : null),
       phone: form.phone.value.trim(),
       estimated_omset_kg: Number(form.estimated_omset_kg.value || 0),
       photo_path: uploadedPhoto.photo_path,
@@ -406,6 +714,7 @@ async function onSubmitForm(event) {
     }
 
     setStatus("Data submitted successfully.", "ok");
+    openSuccessModal("Data Form Informasi Pembeli berhasil dikirim.");
     form.reset();
     latitudeInput.value = "";
     longitudeInput.value = "";
@@ -420,16 +729,23 @@ async function onSubmitForm(event) {
   }
 }
 
+function customerCodeOrNext() {
+  return customerIdInput.value || nextCustomerCode;
+}
+
 function onResetForm() {
   setTimeout(() => {
+    lastReverseGeocodeDetails = null;
     latitudeInput.value = "";
     longitudeInput.value = "";
     addressInput.value = "";
+    resetCallAddressFields();
     customerSearchResults.innerHTML = "";
     photoPreview.style.display = "none";
     photoPreview.removeAttribute("src");
     setStatus("");
     customerIdInput.value = nextCustomerCode;
+    syncContactMethodMode();
   }, 0);
 }
 
