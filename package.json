@@ -1,5 +1,8 @@
 {
   "devDependencies": {
     "supabase": "^2.76.17"
+  },
+  "dependencies": {
+    "vercel": "^50.28.0"
   }
 }

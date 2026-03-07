@@ -12,3 +12,6 @@ config.js
 .DS_Store
 Thumbs.db
 .vscode/
+
+supabase_schema.sql
+README.MD
