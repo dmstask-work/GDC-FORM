@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Form Aktivitas Harian Sales</title>
+	<link rel="icon" href="../image/title_image.png" type="image/png">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+	<main class="form-shell">
+		<header class="form-header">
+			<img src="../image/header_image.png" alt="Form title image">
+			<div class="header-copy">
+				<h1>Form Aktivitas Harian Sales</h1>
+			</div>
+		</header>
+
+		<form id="activityForm">
+			<div class="field">
+				<label for="activitySalesCode">Nama Sales :</label>
+				<select id="activitySalesCode" name="sales_code" required>
+					<option value="" selected disabled>Pilih kode sales</option>
+				</select>
+			</div>
+
+			<div class="field">
+				<label for="activityCustomerName">Nama Pembeli :</label>
+				<input id="activityCustomerName" name="customer_name" type="text" placeholder="Masukan nama pembeli" required>
+				<p class="hint">Ketik nama pembeli. Jika sudah ada, alamat, no telp/WA, dan kategori akan terisi otomatis.</p>
+				<div id="activityCustomerSearchResults" class="customer-search-results" aria-live="polite"></div>
+				<button id="btnEditCustomerManual" class="btn-edit-manual" type="button" hidden>Edit manual alamat/telp/kategori</button>
+			</div>
+
+			<div class="field">
+				<label for="activityAddress">Alamat :</label>
+				<textarea id="activityAddress" name="address" placeholder="Masukan alamat" required></textarea>
+			</div>
+
+			<div class="field">
+				<label for="activityPhone">No Telp/WA :</label>
+				<input id="activityPhone" name="phone" type="text" placeholder="08...." required>
+			</div>
+
+			<div class="field">
+				<label for="activityCustomerCategory">Kategori Pembeli :</label>
+				<select id="activityCustomerCategory" name="customer_category" required>
+					<option value="" selected disabled>Pilih kategori pembeli</option>
+					<option value="retail">Retail</option>
+					<option value="distributor">Distributor</option>
+				</select>
+			</div>
+
+			<div class="field">
+				<label for="activityContactMethod">Kontak :</label>
+				<select id="activityContactMethod" name="contact_method" required>
+					<option value="" selected disabled>Pilih kontak</option>
+					<option value="kanvasing">Kanvasing</option>
+					<option value="call_telp_wa">Call (Telp / WA)</option>
+				</select>
+			</div>
+
+			<div class="field">
+				<label for="activityType">Tipe :</label>
+				<select id="activityType" name="activity_type" required>
+					<option value="" selected disabled>Pilih tipe</option>
+					<option value="hunter">Hunter</option>
+					<option value="farmer">Farmer</option>
+				</select>
+			</div>
+
+			<div class="field">
+				<label for="activityKind">Aktivitas :</label>
+				<select id="activityKind" name="activity_kind" required>
+					<option value="" selected disabled>Pilih aktivitas</option>
+					<option value="prospek">Prospek</option>
+					<option value="follow_up">Follow Up</option>
+					<option value="maintenance">Maintenance</option>
+				</select>
+			</div>
+
+			<div class="field">
+				<label for="activityResult">Hasil :</label>
+				<select id="activityResult" name="result_type" required>
+					<option value="" selected disabled>Pilih hasil</option>
+					<option value="closing">Closing</option>
+					<option value="non_closing">Non Closing</option>
+				</select>
+			</div>
+
+			<div class="field">
+				<label for="activityResultKg">Hasil (Kg) :</label>
+				<input id="activityResultKg" name="result_kg" type="number" min="0" step="0.01" value="0" required>
+				<p class="hint">Jika hasil Non Closing, nilai otomatis 0 kg.</p>
+			</div>
+
+			<div id="closingNoteField" class="field" hidden>
+				<label for="closingNote">Keterangan Closing :</label>
+				<textarea id="closingNote" name="closing_note" placeholder="Keterangan saat closing"></textarea>
+			</div>
+
+			<div class="field">
+				<label for="nextPlanDate">Rencana Kanvasing / Call Selanjutnya :</label>
+				<input id="nextPlanDate" name="next_plan_date" type="date" required>
+			</div>
+
+			<div class="field">
+				<label>Pengiriman Besok :</label>
+				<div class="shipping-grid">
+					<div>
+						<span class="small-label">HD (Kg)</span>
+						<input id="shippingHd" name="shipping_hd_kg" type="number" min="0" step="0.01" value="0" required>
+					</div>
+					<div>
+						<span class="small-label">PP (Kg)</span>
+						<input id="shippingPp" name="shipping_pp_kg" type="number" min="0" step="0.01" value="0" required>
+					</div>
+					<div>
+						<span class="small-label">SDT (Kg)</span>
+						<input id="shippingSdt" name="shipping_sdt_kg" type="number" min="0" step="0.01" value="0" required>
+					</div>
+				</div>
+			</div>
+
+			<div class="field">
+				<label for="activityDetailNote">Keterangan Detail (Optional) :</label>
+				<textarea id="activityDetailNote" name="detail_note" placeholder="Tambahan detail aktivitas (opsional)"></textarea>
+			</div>
+
+			<hr class="divider">
+			<button id="btnActivitySubmit" class="btn btn-submit" type="submit">SUBMIT FORM</button>
+			<button class="btn btn-clear" type="reset" style="margin-top: 8px;">CLEAR FORM</button>
+			<a class="btn btn-clear" href="../" style="margin-top: 8px; display: block; text-align: center; text-decoration: none;">KEMBALI KE MENU</a>
+			<p id="activityStatus" class="status" aria-live="polite"></p>
+		</form>
+
+		<footer class="form-footer">created by @GDC</footer>
+	</main>
+
+	<div id="successModalAktivitas" class="success-modal" hidden>
+		<div class="success-modal-backdrop" data-modal-close="true"></div>
+		<div class="success-modal-card" role="dialog" aria-modal="true" aria-labelledby="successModalAktivitasTitle">
+			<h2 id="successModalAktivitasTitle">Submit Berhasil</h2>
+			<p id="successModalAktivitasMessage">Data berhasil dikirim.</p>
+			<button id="btnCloseSuccessAktivitas" class="btn btn-submit" type="button">OK</button>
+		</div>
+	</div>
+
+	<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+	<script src="../config.js"></script>
+	<script src="../app_aktivitas.js"></script>
+</body>
+</html>
