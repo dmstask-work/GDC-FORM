@@ -8,32 +8,15 @@ const DEFAULT_SALES_OPTIONS = [
   { code: "S007", name: "RATNO" }
 ];
 
-const form = document.getElementById("activityForm");
-const statusEl = document.getElementById("activityStatus");
-const salesCodeInput = document.getElementById("activitySalesCode");
-const customerNameInput = document.getElementById("activityCustomerName");
-const customerSearchResults = document.getElementById("activityCustomerSearchResults");
-const btnEditCustomerManual = document.getElementById("btnEditCustomerManual");
-const addressInput = document.getElementById("activityAddress");
-const phoneInput = document.getElementById("activityPhone");
-const customerCategoryInput = document.getElementById("activityCustomerCategory");
-const resultTypeInput = document.getElementById("activityResult");
-const resultKgInput = document.getElementById("activityResultKg");
-const closingNoteField = document.getElementById("closingNoteField");
-const closingNoteInput = document.getElementById("closingNote");
-const nextPlanDateInput = document.getElementById("nextPlanDate");
-const btnSubmit = document.getElementById("btnActivitySubmit");
-const successModal = document.getElementById("successModalAktivitas");
-const successModalMessage = document.getElementById("successModalAktivitasMessage");
-const btnCloseSuccessModal = document.getElementById("btnCloseSuccessAktivitas");
+let form, statusEl, salesCodeInput, customerNameInput, customerSearchResults;
+let btnEditCustomerManual, addressInput, phoneInput, customerCategoryInput;
+let resultTypeInput, resultKgInput, closingNoteField, closingNoteInput;
+let nextPlanDateInput, btnSubmit, successModal, successModalMessage, btnCloseSuccessModal;
+let notificationModal, notificationModalMessage, btnCloseNotificationModal;
 
 const config = window.APP_CONFIG || {};
-if (!config.SUPABASE_URL || !config.SUPABASE_ANON_KEY || config.SUPABASE_ANON_KEY.includes("<PUT_")) {
-  setStatus("Please set your Supabase values in config.js first.", "error");
-  throw new Error("Missing APP_CONFIG values");
-}
-
-const supabaseClient = window.supabase.createClient(config.SUPABASE_URL, config.SUPABASE_ANON_KEY);
+const supabaseClient = config.SUPABASE_URL && config.SUPABASE_ANON_KEY ? 
+  window.supabase.createClient(config.SUPABASE_URL, config.SUPABASE_ANON_KEY) : null;
 const salesTableName = config.SALES_TABLE_NAME || "sales_master";
 const activityTableName = config.ACTIVITY_TABLE_NAME || "sales_activities";
 const customerSourceTable = config.TABLE_NAME || "customer_submissions";
@@ -43,11 +26,57 @@ let customerLookupTimer = null;
 let latestLookupRequest = 0;
 let selectedCustomerNameForLock = "";
 
-initializeActivityForm();
+// Initialize when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  initApp();
+}
+
+function initApp() {
+  console.log("=== initApp starting ===");
+  console.log("Document ready state:", document.readyState);
+  
+  // Get all DOM elements
+  form = document.getElementById("activityForm");
+  statusEl = document.getElementById("activityStatus");
+  salesCodeInput = document.getElementById("activitySalesCode");
+  customerNameInput = document.getElementById("activityCustomerName");
+  customerSearchResults = document.getElementById("activityCustomerSearchResults");
+  btnEditCustomerManual = document.getElementById("btnEditCustomerManual");
+  addressInput = document.getElementById("activityAddress");
+  phoneInput = document.getElementById("activityPhone");
+  customerCategoryInput = document.getElementById("activityCustomerCategory");
+  resultTypeInput = document.getElementById("activityResult");
+  resultKgInput = document.getElementById("activityResultKg");
+  closingNoteField = document.getElementById("closingNoteField");
+  closingNoteInput = document.getElementById("closingNote");
+  nextPlanDateInput = document.getElementById("nextPlanDate");
+  btnSubmit = document.getElementById("btnActivitySubmit");
+  successModal = document.getElementById("successModalAktivitas");
+  successModalMessage = document.getElementById("successModalAktivitasMessage");
+  btnCloseSuccessModal = document.getElementById("btnCloseSuccessAktivitas");
+  notificationModal = document.getElementById("notificationModalAktivitas");
+  notificationModalMessage = document.getElementById("notificationModalAktivitasMessage");
+  btnCloseNotificationModal = document.getElementById("btnCloseNotificationAktivitas");
+
+  console.log("=== Modal elements after assignment ===");
+  console.log("notificationModal:", notificationModal);
+  console.log("notificationModalMessage:", notificationModalMessage);
+  console.log("btnCloseNotificationModal:", btnCloseNotificationModal);
+
+  if (!config.SUPABASE_URL || !config.SUPABASE_ANON_KEY || config.SUPABASE_ANON_KEY.includes("<PUT_")) {
+    setStatus("Please set your Supabase values in config.js first.", "error");
+    throw new Error("Missing APP_CONFIG values");
+  }
+
+  initializeActivityForm();
+}
 
 async function initializeActivityForm() {
   await hydrateSalesDropdown();
   setupSuccessModal();
+  setupNotificationModal();
   registerEvents();
   syncResultBehavior();
   nextPlanDateInput.value = new Date().toISOString().split("T")[0];
@@ -86,6 +115,46 @@ function closeSuccessModal() {
     return;
   }
   successModal.hidden = true;
+}
+
+function setupNotificationModal() {
+  if (!notificationModal || !btnCloseNotificationModal) {
+    return;
+  }
+
+  btnCloseNotificationModal.addEventListener("click", closeNotificationModal);
+  notificationModal.addEventListener("click", (event) => {
+    const target = event.target;
+    if (target && target.dataset && target.dataset.notificationClose === "true") {
+      closeNotificationModal();
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !notificationModal.hidden) {
+      closeNotificationModal();
+    }
+  });
+}
+
+function openNotificationModal(message) {
+  if (!notificationModal || !notificationModalMessage) {
+    console.error("Notification modal elements not found, using alert instead");
+    alert("⚠️ " + message);
+    return;
+  }
+  console.log("Opening notification modal with message:", message);
+  notificationModalMessage.textContent = message;
+  notificationModal.hidden = false;
+  notificationModal.style.display = "grid";
+}
+
+function closeNotificationModal() {
+  if (!notificationModal) {
+    return;
+  }
+  notificationModal.hidden = true;
+  notificationModal.style.display = "none";
 }
 
 function setStatus(message, type = "") {
@@ -315,6 +384,28 @@ function getSelectedSales() {
   return selected;
 }
 
+async function checkCustomerExists(customerName) {
+  const normalizedName = String(customerName || "").trim();
+
+  if (!normalizedName) {
+    return false;
+  }
+
+  const { data, error } = await supabaseClient
+    .from(customerSourceTable)
+    .select("id, customer_name")
+    .ilike("customer_name", normalizedName)
+    .order("id", { ascending: false })
+    .limit(1);
+
+  if (error) {
+    console.error(error);
+    return false;
+  }
+
+  return Boolean(data && data.length);
+}
+
 function buildPayload() {
   const selectedSales = getSelectedSales();
   const resultType = form.result_type.value;
@@ -355,6 +446,16 @@ async function onSubmit(event) {
   btnSubmit.disabled = true;
 
   try {
+    // Check if customer exists
+    const customerExists = await checkCustomerExists(form.customer_name.value);
+    console.log("Customer exists check:", customerExists, "for name:", form.customer_name.value);
+    
+    if (!customerExists) {
+      openNotificationModal("Tidak bisa input pembeli baru, tolong input informasi pembeli pada form sebelumnya terlebih dahulu");
+      btnSubmit.disabled = false;
+      return;
+    }
+    
     setStatus("Submitting aktivitas harian sales...");
     const payload = buildPayload();
     const { error } = await supabaseClient.from(activityTableName).insert(payload);

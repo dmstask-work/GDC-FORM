@@ -20,6 +20,7 @@ body {
   min-height: 100vh;
   font-family: "Manrope", sans-serif;
   color: var(--text);
+  background-color: #5f73d8;
   background:
     radial-gradient(circle at 15% 15%, #6f86e4 0%, transparent 35%),
     radial-gradient(circle at 85% 85%, #8045bc 0%, transparent 30%),
@@ -30,6 +31,7 @@ body {
 }
 
 body.menu-page {
+  background-color: #5f73d8;
   background:
     radial-gradient(circle at 12% 12%, #6f86e4 0%, transparent 34%),
     radial-gradient(circle at 86% 86%, #8045bc 0%, transparent 30%),
@@ -461,6 +463,12 @@ textarea {
 }
 
 @media (max-width: 640px) {
+  body,
+  body.menu-page {
+    /* Solid fallback on small devices for better compatibility/performance. */
+    background: #5f73d8;
+  }
+
   .menu-actions {
     padding: 22px 14px 20px;
   }
