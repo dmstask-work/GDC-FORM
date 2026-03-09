@@ -1,16 +1,1 @@
-{
-  "cleanUrls": true,
-  "trailingSlash": true,
-  "redirects": [
-    {
-      "source": "/form_informasi.html",
-      "destination": "/form_informasi/",
-      "permanent": true
-    },
-    {
-      "source": "/form_aktivitas.html",
-      "destination": "/form_aktivitas/",
-      "permanent": true
-    }
-  ]
-}
+
