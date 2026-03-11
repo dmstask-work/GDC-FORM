@@ -621,7 +621,7 @@ function validatePhoto(file) {
   if (!file.type.startsWith("image/")) {
     return "File must be an image.";
   }
-  if (file.size > 5 * 1024 * 1024) {
+  if (file.size > 20 * 1024 * 1024) {
     return "Photo size max 5MB.";
   }
   return "";
