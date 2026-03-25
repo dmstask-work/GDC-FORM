@@ -1,12 +1,4 @@
-const DEFAULT_SALES_OPTIONS = [
-  { code: "S001", name: "YUNIA" },
-  { code: "S002", name: "YOGI" },
-  { code: "S003", name: "IDA" },
-  { code: "S004", name: "NUR" },
-  { code: "S005", name: "DWI" },
-  { code: "S006", name: "BENI" },
-  { code: "S007", name: "RATNO" }
-];
+// DEFAULT_SALES_OPTIONS, supabaseClient, and compressToWebP are provided by shared.js
 
 const form = document.getElementById("customerForm");
 const statusEl = document.getElementById("status");
@@ -32,14 +24,11 @@ const btnSubmit = document.getElementById("btnSubmit");
 const successModal = document.getElementById("successModalInformasi");
 const successModalMessage = document.getElementById("successModalInformasiMessage");
 const btnCloseSuccessModal = document.getElementById("btnCloseSuccessInformasi");
+const warningModal = document.getElementById("warningModal");
+const warningModalMessage = document.getElementById("warningModalMessage");
+const btnCloseWarning = document.getElementById("btnCloseWarning");
 
-const config = window.APP_CONFIG || {};
-if (!config.SUPABASE_URL || !config.SUPABASE_ANON_KEY || config.SUPABASE_ANON_KEY.includes("<PUT_")) {
-  setStatus("Please set your Supabase values in config.js first.", "error");
-  throw new Error("Missing APP_CONFIG values");
-}
-
-const supabaseClient = window.supabase.createClient(config.SUPABASE_URL, config.SUPABASE_ANON_KEY);
+const config = window.APP_CONFIG;
 const salesTableName = config.SALES_TABLE_NAME || "sales_master";
 const wilayahApiBase = (config.WILAYAH_API_BASE_URL || "https://www.emsifa.com/api-wilayah-indonesia/api").replace(/\/+$/, "");
 let nextCustomerCode = "CST000001";
@@ -50,15 +39,30 @@ let salesByCode = Object.fromEntries(salesOptions.map((item) => [item.code, item
 let cachedProvinces = [];
 let lastReverseGeocodeDetails = null;
 
-initializeApp();
+window.authReady.then(initializeApp).catch(() => { /* redirecting to login */ });
 
 async function initializeApp() {
   await hydrateSalesDropdown();
+  autoSelectSalesFromLogin();
   bindPhotoPreview();
   setupSuccessModal();
+  setupWarningModal();
   registerEvents();
   syncContactMethodMode();
   await prepareNextCustomerCode();
+}
+
+function autoSelectSalesFromLogin() {
+  const username = ((window.currentUser?.user_metadata?.username) || "").toLowerCase();
+  if (!username) return;
+
+  const match = salesOptions.find((s) => s.name.toLowerCase() === username);
+  if (match) {
+    salesNameInput.value = match.code;
+    salesNameInput.disabled = true;
+    salesNameInput.classList.add("select-locked");
+    salesNameInput.title = "Kode sales otomatis dari akun login Anda";
+  }
 }
 
 function setupSuccessModal() {
@@ -94,6 +98,41 @@ function closeSuccessModal() {
     return;
   }
   successModal.hidden = true;
+}
+
+function setupWarningModal() {
+  if (!warningModal || !btnCloseWarning) {
+    return;
+  }
+
+  btnCloseWarning.addEventListener("click", closeWarningModal);
+  warningModal.addEventListener("click", (event) => {
+    const target = event.target;
+    if (target && target.dataset && target.dataset.modalClose === "true") {
+      closeWarningModal();
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !warningModal.hidden) {
+      closeWarningModal();
+    }
+  });
+}
+
+function openWarningModal(message) {
+  if (!warningModal || !warningModalMessage) {
+    return;
+  }
+  warningModalMessage.textContent = message;
+  warningModal.hidden = false;
+}
+
+function closeWarningModal() {
+  if (!warningModal) {
+    return;
+  }
+  warningModal.hidden = true;
 }
 
 async function hydrateSalesDropdown() {
@@ -621,19 +660,19 @@ function validatePhoto(file) {
   if (!file.type.startsWith("image/")) {
     return "File must be an image.";
   }
-  if (file.size > 20 * 1024 * 1024) {
-    return "Photo size max 5MB.";
+  if (file.size > 10 * 1024 * 1024) {
+    return "Photo size max 10MB.";
   }
   return "";
 }
 
 async function uploadPhoto(file, customerCode) {
-  const extension = file.name.includes(".") ? file.name.split(".").pop().toLowerCase() : "jpg";
-  const path = `${customerCode}/${Date.now()}_${crypto.randomUUID()}.${extension}`;
+  const compressed = await compressToWebP(file);
+  const path = `${customerCode}/${Date.now()}_${crypto.randomUUID()}.webp`;
 
   const { error } = await supabaseClient.storage
     .from(config.STORAGE_BUCKET)
-    .upload(path, file, { upsert: false, cacheControl: "3600" });
+    .upload(path, compressed, { upsert: false, cacheControl: "3600", contentType: "image/webp" });
 
   if (error) {
     throw new Error(`Photo upload failed: ${error.message}`);
@@ -646,11 +685,44 @@ async function uploadPhoto(file, customerCode) {
   };
 }
 
+async function checkPhoneExists(phoneNumber) {
+  try {
+    const { data, error } = await supabaseClient
+      .from(config.TABLE_NAME)
+      .select('phone')
+      .eq('phone', phoneNumber.trim())
+      .limit(1);
+
+    if (error) {
+      console.error('Error checking phone:', error);
+      return false;
+    }
+
+    return data && data.length > 0;
+  } catch (error) {
+    console.error('Error in checkPhoneExists:', error);
+    return false;
+  }
+}
+
 async function onSubmitForm(event) {
   event.preventDefault();
   btnSubmit.disabled = true;
 
   try {
+    // Check if phone number already exists
+    const phoneNumber = form.phone.value.trim();
+    if (phoneNumber) {
+      setStatus("Checking phone number...");
+      const phoneExists = await checkPhoneExists(phoneNumber);
+      if (phoneExists) {
+        openWarningModal("⚠️ Peringatan\n\nTidak bisa input pembeli baru dengan nomer telp/wa yang sama, tolong input informasi pembeli dengan nomer telp/wa yang berbeda!");
+        setStatus("", "");
+        btnSubmit.disabled = false;
+        return;
+      }
+    }
+
     setStatus("Uploading photo and submitting data...");
     const selectedSales = getSelectedSales();
     const contactMethod = form.contact_method.value;
@@ -667,6 +739,11 @@ async function onSubmitForm(event) {
     };
 
     if (isKanvasing) {
+      if (!latitudeInput.value || !longitudeInput.value) {
+        openWarningModal("Harap klik GET LOCATION terlebih dahulu untuk mendapatkan koordinat lokasi.");
+        return;
+      }
+
       const photoFile = photoInput.files && photoInput.files[0] ? photoInput.files[0] : null;
       const photoError = validatePhoto(photoFile);
       if (photoError) {

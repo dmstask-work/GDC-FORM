@@ -4,21 +4,19 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Form Informasi Pembeli</title>
-	<link rel="icon" href="image/title_image.png" type="image/png">
+	<link rel="icon" href="/image/title_image.png" type="image/png">
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
-	<link rel="stylesheet" href="styles.css">
+	<link rel="stylesheet" href="/styles.css">
 	<style>body { visibility: hidden; }</style>
 </head>
 <body>
 	<main class="form-shell">
 		<header class="form-header">
-			<img src="image/header_image.png" alt="Form header image">
+			<img src="/image/header_image.png" alt="Form header image">
 			<div class="header-copy">
 				<h1>Form Informasi Pembeli</h1>
-				<p>Diisi maksimal pukul 17:30 WIB setiap harinya oleh tim sales.</p>
-				<button id="btnLogout" class="btn-logout" type="button">Keluar</button>
 			</div>
 		</header>
     
@@ -56,7 +54,7 @@
 				<label for="contactMethod">Kontak Melalui :</label>
 				<select id="contactMethod" name="contact_method" required>
 					<option value="" selected disabled>Pilih kontak melalui</option>
-					<option value="kanvasing">Kunjungan</option>
+					<option value="kanvasing">Kanvasing</option>
 					<option value="call_telp_wa">Call (Telp / WA)</option>
 				</select>
 			</div>
@@ -135,18 +133,18 @@
 			</div>
 
 			<div class="field">
-				<label for="estimatedOmset">Perkiraan Omset Perbulan (Kg) :</label>
+				<label for="estimatedOmset">Perkiraan Omset (Kg) :</label>
 				<input id="estimatedOmset" name="estimated_omset_kg" type="number" min="0" step="0.01" value="0" required>
 			</div>
-			
+
 			<hr class="divider">
 			<button id="btnSubmit" class="btn btn-submit" type="submit">SUBMIT FORM</button>
 			<button class="btn btn-clear" type="reset" style="margin-top: 8px;">CLEAR FORM</button>
-			<a class="btn btn-clear" href="index.html" style="margin-top: 8px; display: block; text-align: center; text-decoration: none;">KEMBALI KE MENU</a>
+			<a class="btn btn-clear" href="../" style="margin-top: 8px; display: block; text-align: center; text-decoration: none;">KEMBALI KE MENU</a>
 			<p id="status" class="status" aria-live="polite"></p>
 		</form>
 
-		<footer class="form-footer">© 2026 CV. Panca Gemilang. All rights reserved. @GDC</footer>
+		<footer class="form-footer">created by @GDC</footer>
 	</main>
 
 	<div id="successModalInformasi" class="success-modal" hidden>
@@ -158,19 +156,11 @@
 		</div>
 	</div>
 
-	<div id="warningModal" class="success-modal" hidden>
-		<div class="success-modal-backdrop" data-modal-close="true"></div>
-		<div class="success-modal-card" role="dialog" aria-modal="true" aria-labelledby="warningModalTitle">
-			<h2 id="warningModalTitle" style="color: #ff9800;">Peringatan</h2>
-			<p id="warningModalMessage">tidak bisa input pembeli baru dengan nomer telp/wa yang sama, tolong input informasi pembeli dengan nomer telp/wa yang berbeda!</p>
-			<button id="btnCloseWarning" class="btn btn-submit" type="button" style="background: #ff9800;">OK</button>
-		</div>
-	</div>
-
 	<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-	<script src="config.js"></script>
-	<script src="shared.js"></script>
-	<script src="auth-guard.js"></script>
-	<script src="app.js"></script>
+	<script src="/config.js"></script>
+	<script src="/shared.js"></script>
+	<script src="/auth-guard.js"></script>
+	<script src="/app.js"></script>
 </body>
 </html>
+

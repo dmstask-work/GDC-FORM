@@ -13,5 +13,7 @@ config.js
 Thumbs.db
 .vscode/
 
+compress-existing-photos.mjs
+admin-users.mjs
 supabase_schema.sql
 README.MD

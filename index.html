@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
+  <style>body { visibility: hidden; }</style>
 </head>
 <body class="menu-page">
   <main class="menu-shell">
@@ -29,10 +30,17 @@
         <span class="menu-btn-title">Form Aktivitas Harian Sales</span>
         <span class="menu-btn-hint">Laporan kegiatan dan progres harian sales</span>
       </a>
+
+      <button id="btnLogout" class="btn btn-clear" type="button" style="margin-top: 4px;">KELUAR</button>
     </section>
 
     <footer class="form-footer">© 2026 CV. Panca Gemilang. All rights reserved. @GDC</footer>
   </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="shared.js"></script>
+  <script src="auth-guard.js"></script>
 </body>
 </html>
 

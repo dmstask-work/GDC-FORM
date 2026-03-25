@@ -1,12 +1,4 @@
-const DEFAULT_SALES_OPTIONS = [
-  { code: "S001", name: "YUNIA" },
-  { code: "S002", name: "YOGI" },
-  { code: "S003", name: "IDA" },
-  { code: "S004", name: "NUR" },
-  { code: "S005", name: "DWI" },
-  { code: "S006", name: "BENI" },
-  { code: "S007", name: "RATNO" }
-];
+// DEFAULT_SALES_OPTIONS and supabaseClient are provided by shared.js
 
 let form, statusEl, salesCodeInput, customerNameInput, customerSearchResults;
 let btnEditCustomerManual, addressInput, phoneInput, customerCategoryInput;
@@ -14,9 +6,7 @@ let resultTypeInput, resultKgInput, closingNoteField, closingNoteInput;
 let nextPlanDateInput, btnSubmit, successModal, successModalMessage, btnCloseSuccessModal;
 let notificationModal, notificationModalMessage, btnCloseNotificationModal;
 
-const config = window.APP_CONFIG || {};
-const supabaseClient = config.SUPABASE_URL && config.SUPABASE_ANON_KEY ? 
-  window.supabase.createClient(config.SUPABASE_URL, config.SUPABASE_ANON_KEY) : null;
+const config = window.APP_CONFIG;
 const salesTableName = config.SALES_TABLE_NAME || "sales_master";
 const activityTableName = config.ACTIVITY_TABLE_NAME || "sales_activities";
 const customerSourceTable = config.TABLE_NAME || "customer_submissions";
@@ -26,12 +16,14 @@ let customerLookupTimer = null;
 let latestLookupRequest = 0;
 let selectedCustomerNameForLock = "";
 
-// Initialize when DOM is ready
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initApp);
-} else {
-  initApp();
-}
+// Wait for auth check before initializing
+window.authReady.then(() => {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initApp);
+  } else {
+    initApp();
+  }
+}).catch(() => { /* redirecting to login */ });
 
 function initApp() {
   console.log("=== initApp starting ===");
@@ -65,21 +57,30 @@ function initApp() {
   console.log("notificationModalMessage:", notificationModalMessage);
   console.log("btnCloseNotificationModal:", btnCloseNotificationModal);
 
-  if (!config.SUPABASE_URL || !config.SUPABASE_ANON_KEY || config.SUPABASE_ANON_KEY.includes("<PUT_")) {
-    setStatus("Please set your Supabase values in config.js first.", "error");
-    throw new Error("Missing APP_CONFIG values");
-  }
-
   initializeActivityForm();
 }
 
 async function initializeActivityForm() {
   await hydrateSalesDropdown();
+  autoSelectSalesFromLogin();
   setupSuccessModal();
   setupNotificationModal();
   registerEvents();
   syncResultBehavior();
   nextPlanDateInput.value = new Date().toISOString().split("T")[0];
+}
+
+function autoSelectSalesFromLogin() {
+  const username = ((window.currentUser?.user_metadata?.username) || "").toLowerCase();
+  if (!username) return;
+
+  const match = salesOptions.find((s) => s.name.toLowerCase() === username);
+  if (match) {
+    salesCodeInput.value = match.code;
+    salesCodeInput.disabled = true;
+    salesCodeInput.classList.add("select-locked");
+    salesCodeInput.title = "Kode sales otomatis dari akun login Anda";
+  }
 }
 
 function setupSuccessModal() {

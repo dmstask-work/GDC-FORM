@@ -411,12 +411,40 @@ textarea {
   font-weight: 700;
 }
 
+.select-locked {
+  opacity: 1 !important;
+  background: #f0f4ff !important;
+  color: #3a4d7a !important;
+  cursor: default;
+  pointer-events: none;
+}
+
 .status.ok {
   color: var(--ok);
 }
 
 .status.error {
   color: var(--error);
+}
+
+.btn-logout {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 5px 14px;
+  border: 1px solid #c8d2e8;
+  border-radius: 5px;
+  background: transparent;
+  color: #6574a0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.btn-logout:hover {
+  background: #fff0f0;
+  color: #d93025;
+  border-color: #f5b0aa;
 }
 
 .success-modal {

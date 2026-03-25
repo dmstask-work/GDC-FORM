@@ -4,20 +4,20 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Form Aktivitas Harian Sales</title>
-	<link rel="icon" href="image/title_image.png" type="image/png">
+	<link rel="icon" href="/image/title_image.png" type="image/png">
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
-	<link rel="stylesheet" href="styles.css">
+	<link rel="stylesheet" href="/styles.css">
 	<style>body { visibility: hidden; }</style>
 </head>
 <body>
 	<main class="form-shell">
 		<header class="form-header">
-			<img src="image/header_image.png" alt="Form title image">
+			<img src="/image/header_image.png" alt="Form title image">
 			<div class="header-copy">
 				<h1>Form Aktivitas Harian Sales</h1>
-				<button id="btnLogout" class="btn-logout" type="button">Keluar</button>
+				<p>Laporan Harian Dikirim Sebelum Jam 17.30 WIB</p>
 			</div>
 		</header>
 
@@ -135,11 +135,11 @@
 			<hr class="divider">
 			<button id="btnActivitySubmit" class="btn btn-submit" type="submit">SUBMIT FORM</button>
 			<button class="btn btn-clear" type="reset" style="margin-top: 8px;">CLEAR FORM</button>
-			<a class="btn btn-clear" href="index.html" style="margin-top: 8px; display: block; text-align: center; text-decoration: none;">KEMBALI KE MENU</a>
+			<a class="btn btn-clear" href="../" style="margin-top: 8px; display: block; text-align: center; text-decoration: none;">KEMBALI KE MENU</a>
 			<p id="activityStatus" class="status" aria-live="polite"></p>
 		</form>
 
-		<footer class="form-footer">© 2026 CV. Panca Gemilang. All rights reserved. @GDC</footer>
+		<footer class="form-footer">created by @GDC</footer>
 	</main>
 
 	<div id="successModalAktivitas" class="success-modal" hidden>
@@ -161,9 +161,9 @@
 	</div>
 
 	<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-	<script src="config.js"></script>
-	<script src="shared.js"></script>
-	<script src="auth-guard.js"></script>
-	<script src="app_aktivitas.js"></script>
+	<script src="/config.js"></script>
+	<script src="/shared.js"></script>
+	<script src="/auth-guard.js"></script>
+	<script src="/app_aktivitas.js"></script>
 </body>
 </html>
