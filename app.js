@@ -188,6 +188,19 @@ function registerEvents() {
       customerSearchResults.innerHTML = "";
     }, 140);
   });
+
+  // Phone: block non-numeric input in real-time
+  const phoneInput = document.getElementById("phone");
+  phoneInput.addEventListener("input", () => {
+    phoneInput.value = phoneInput.value.replace(/\D/g, "");
+  });
+  phoneInput.addEventListener("keydown", (e) => {
+    const allowed = ["Backspace", "Delete", "ArrowLeft", "ArrowRight", "Tab", "Home", "End"];
+    if (!allowed.includes(e.key) && !/^\d$/.test(e.key)) {
+      e.preventDefault();
+    }
+  });
+
   form.addEventListener("submit", onSubmitForm);
   form.addEventListener("reset", onResetForm);
 }
@@ -710,8 +723,17 @@ async function onSubmitForm(event) {
   btnSubmit.disabled = true;
 
   try {
-    // Check if phone number already exists
+    // Validate phone number format
     const phoneNumber = form.phone.value.trim();
+    const phoneRegex = /^0\d{9,12}$/;
+    if (!phoneRegex.test(phoneNumber)) {
+      openWarningModal("⚠️ Format Nomor Tidak Valid\n\nNomor telepon harus:\n• Diawali angka 0\n• Hanya berisi angka (tanpa simbol)\n• Terdiri dari 10 hingga 13 digit");
+      setStatus("", "");
+      btnSubmit.disabled = false;
+      return;
+    }
+
+    // Check if phone number already exists
     if (phoneNumber) {
       setStatus("Checking phone number...");
       const phoneExists = await checkPhoneExists(phoneNumber);
