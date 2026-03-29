@@ -10,10 +10,16 @@ function usernameToEmail(username) {
 }
 // ──────────────────────────────────────────────────────────────────────────────
 
-// If already authenticated, skip straight to the app menu
+// If already authenticated AND session not expired, skip straight to the app menu
+const SESSION_DURATION_MS = 30 * 60 * 1000; // must match auth-guard.js
 window.supabaseClient.auth.getSession().then(({ data: { session } }) => {
-  if (session) {
+  const loginTime = parseInt(localStorage.getItem("loginTime") || "0");
+  const sessionExpired = !loginTime || (Date.now() - loginTime > SESSION_DURATION_MS);
+  if (session && !sessionExpired) {
     window.location.replace("/");
+  } else {
+    // Clear any stale session data so login page is clean
+    localStorage.removeItem("loginTime");
   }
 });
 
@@ -50,8 +56,6 @@ loginForm.addEventListener("submit", async (event) => {
     password: passwordInput.value
   });
 
-  loginStatus.textContent = "";
-
   if (error) {
     // Distinguish between unknown username vs wrong password by checking sales_master.
     const { data: salesMatch } = await window.supabaseClient
@@ -68,5 +72,6 @@ loginForm.addEventListener("submit", async (event) => {
     return;
   }
 
+  localStorage.setItem("loginTime", Date.now().toString());
   window.location.replace("/");
 });

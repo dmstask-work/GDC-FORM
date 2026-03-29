@@ -16,7 +16,12 @@ const DEFAULT_SALES_OPTIONS = [
   if (!cfg.SUPABASE_URL || !cfg.SUPABASE_ANON_KEY || cfg.SUPABASE_ANON_KEY.includes("<PUT_")) {
     throw new Error("Missing APP_CONFIG values — set SUPABASE_URL and SUPABASE_ANON_KEY in config.js");
   }
-  window.supabaseClient = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
+  window.supabaseClient = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY, {
+    auth: {
+      autoRefreshToken: false,  // Session hard-expires; no silent renewal
+      persistSession: true
+    }
+  });
 })();
 
 /**
