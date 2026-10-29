@@ -4,6 +4,7 @@ window.APP_CONFIG = {
   TABLE_NAME: "customer_submissions",
   SALES_TABLE_NAME: "sales_master",
   ACTIVITY_TABLE_NAME: "sales_activities",
+  PENJUALAN_TABLE_NAME: "penjualan",
   STORAGE_BUCKET: "customer-photos",
   // Optional. For province/city/district/subdistrict dropdown source in Call mode.
   WILAYAH_API_BASE_URL: "https://www.emsifa.com/api-wilayah-indonesia/api",

@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Bravo Sales - Geomap</title>
+  <link rel="icon" href="/assets/images/title_image.png" type="image/png">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css">
+  <link rel="stylesheet" href="/assets/css/geo-map.css">
+  <style>body { visibility: hidden; }</style>
+</head>
+<body>
+  <div id="geoMap"></div>
+
+  <!-- Toolbar: back, refresh, status -->
+  <div class="geo-panel geo-toolbar">
+    <a class="geo-btn" href="/">&larr; Menu</a>
+    <button id="btnGeoRefresh" class="geo-btn geo-btn-primary" type="button">Refresh</button>
+    <div class="geo-toolbar-info">
+      <div id="geoCount" class="geo-count">-</div>
+      <div id="geoStatus" class="geo-status" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <!-- Legend -->
+  <div class="geo-panel geo-legend">
+    <b>Keterangan</b>
+    <div><span class="geo-dot" style="background:#99E194;"></span>Pembeli</div>
+    <div><span class="geo-dot" style="background:#FFC784;"></span>Belum Pembeli</div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/assets/js/config.js"></script>
+  <script src="/assets/js/core/shared.js"></script>
+  <script src="/assets/js/core/auth-guard.js"></script>
+  <script src="/assets/js/pages/geo-map.js"></script>
+</body>
+</html>

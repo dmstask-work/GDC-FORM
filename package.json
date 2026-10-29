@@ -1,5 +1,22 @@
 {
+  "name": "bravo-sales-form",
+  "private": true,
+  "description": "Bravo Sales - static frontend (Vercel) + Supabase backend",
+  "scripts": {
+    "build": "node scripts/generate-config.mjs",
+    "predev": "node scripts/generate-config.mjs",
+    "dev": "serve public --listen 3000",
+    "prestart": "node scripts/generate-config.mjs",
+    "start": "serve public --listen 3000",
+    "setup:config": "node scripts/generate-config.mjs",
+    "deploy:preview": "vercel",
+    "deploy:prod": "vercel --prod",
+    "functions:deploy": "supabase functions deploy reverse-geocode",
+    "admin:users": "node scripts/admin-users.mjs",
+    "photos:compress": "node scripts/compress-existing-photos.mjs"
+  },
   "devDependencies": {
+    "serve": "^14.2.6",
     "supabase": "^2.76.17"
   },
   "dependencies": {
